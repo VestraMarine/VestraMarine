@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VestraMarine Web Dashboard</title>
+    <style>
+        body { background-color: #0B2F2F; color: #E0F2F1; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 30px; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #004D40; padding-bottom: 15px; margin-bottom: 25px; }
+        .header-title h1 { color: #4DB6AC; margin: 0; letter-spacing: 4px; font-size: 32px; }
+        .header-title p { color: #80CBC4; font-style: italic; margin: 4px 0 0 0; font-size: 14px; }
+        .metrics-bar { background-color: #0D3B3B; padding: 15px 25px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #004D40; margin-bottom: 30px; color: #80CBC4; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .layout-container { display: flex; gap: 30px; }
+        .panel { background-color: #0D3B3B; padding: 25px; border-radius: 8px; border: 1px solid #004D40; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .form-panel { width: 32%; height: fit-content; }
+        .data-panel { width: 68%; }
+        label { font-weight: bold; font-size: 14px; color: #80CBC4; }
+        input, textarea { width: 100%; padding: 10px; margin: 6px 0 16px 0; border: 1px solid #004D40; background: #0B2F2F; color: #E0F2F1; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        button { background-color: #004D40; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 15px; }
+        button:hover { background-color: #00796B; }
+        .submit-btn { width: 100%; margin-top: 5px; font-size: 16px; }
+        
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .search-container input { margin: 0; }
+        .export-btn { background-color: #00695C; border: 1px solid #4DB6AC; text-decoration: none; color: white; padding: 12px 20px; font-weight: bold; border-radius: 4px; font-size: 15px; display: inline-block; transition: background 0.2s; }
+        .export-btn:hover { background-color: #004D40; }
+
+        table { width: 100%; border-collapse: collapse; background-color: #0B2F2F; margin-bottom: 30px; }
+        th, td { padding: 12px 15px; text-align: left; font-size: 15px; border: 1px solid #004D40; }
+        th { background-color: #004D40; color: white; font-weight: bold; }
+        .delete-btn { background-color: #7B1FA2; padding: 6px 12px; font-size: 13px; border: none; color: white; border-radius: 4px; cursor: pointer; }
+        .delete-btn:hover { background-color: #9C27B0; }
+        .chart-section { border-top: 2px solid #004D40; padding-top: 25px; margin-top: 20px; }
+        .chart-box { display: flex; align-items: flex-end; gap: 20px; background: #0B2F2F; padding: 25px 20px 35px 20px; border-radius: 6px; border: 1px solid #004D40; height: 150px; }
+        .bar { background-color: #4DB6AC; width: 50px; text-align: center; color: #0B2F2F; font-size: 12px; font-weight: bold; border-radius: 4px 4px 0 0; position: relative; }
+        .bar-label { font-size: 11px; color: #E0F2F1; position: absolute; bottom: -24px; left: 0; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: normal; }
+        .logout-link { color: #E57373; text-decoration: none; font-weight: bold; font-size: 15px; border: 1px solid #E57373; padding: 8px 16px; border-radius: 4px; }
+        .logout-link:hover { background: rgba(229, 115, 115, 0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="header-title">
+            <h1>VESTRAMARINE</h1>
+            <p>Enterprise Desktop Marine Science Database Engine</p>
+        </div>
+        <div>
+            <a href="/logout" class="logout-link">🔒 Log Out Session</a>
+        </div>
+    </div>
+
+    <div class="metrics-bar">
+        Active Telemetry Records: <span style="color: #4DB6AC;">{{ count }}</span> &nbsp;|&nbsp; Average Fleet Temperature Matrix: <span style="color: #4DB6AC;">{{ avg_temp }}°C</span>
+    </div>
+
+    <div class="layout-container">
+        <!-- FORM PANEL -->
+        <div class="panel form-panel">
+            <h3 style="color: #4DB6AC; margin-top: 0; font-size: 20px; border-bottom: 1px solid #004D40; padding-bottom: 8px;">Log Telemetry Data</h3>
+            <form method="POST">
+                <input type="hidden" name="add_entry" value="1">
+                
+                <label>Location / Region:</label>
+                <input type="text" name="location" required placeholder="e.g. Mariana Trench">
+                
+                <label>Water Temp (°C):</label>
+                <input type="number" step="0.1" name="water_temp" placeholder="e.g. 4.5">
+                
+                <label>Salinity (PSU):</label>
+                <input type="number" step="0.1" name="salinity" placeholder="e.g. 35.2">
+                
+                <label>Observed Species:</label>
+                <input type="text" name="species" placeholder="e.g. Anomalocaris">
+                
+                <label>Field Notes:</label>
+                <textarea name="notes" rows="4" placeholder="Enter scientific field annotations..."></textarea>
+                
+                <button type="submit" class="submit-btn">Deploy Record</button>
+            </form>
+        </div>
+
+        <!-- MAIN DISPLAY PANEL -->
+        <div class="panel data-panel">
+            <h3 style="color: #4DB6AC; margin-top: 0; font-size: 20px;">Active Fleet Information Grid</h3>
+            
+            <div class="search-container">
+                <form method="GET" action="/dashboard" style="display: flex; gap: 10px; flex-grow: 1;">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Filter entries by region or species..." style="flex-grow: 1;">
+                    <button type="submit">Filter Search</button>
+                    {% if search_query %}
+                        <a href="/dashboard"><button type="button" style="background:#37474F; color:white; border:none; padding:12px; border-radius:4px; cursor:pointer;">Clear</button></a>
+                    {% endif %}
+                </form>
+                
+                <!-- 📥 LINK TO DOWNLOAD DATABASE ROWS DIRECTLY AS SPREADSHEET -->
+                <a href="/export" class="export-btn">📥 Export Spreadsheet</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location/Region</th>
+                        <th>Temperature</th>
+                        <th>Salinity Matrix</th>
+                        <th>Species Tracked</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in rows %}
+                    <tr>
+                        <td>{{ item.location }}</td>
+                        <td>{{ item.temp }}°C</td>
+                        <td>{{ item.salinity }} PSU</td>
+                        <td style="color: #4DB6AC; font-weight: bold;">{{ item.species }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="delete_id" value="{{ item.id }}">
+                                <button type="submit" class="delete-btn">Wipe Row</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="chart-section">
+                <h3 style="color: #4DB6AC; margin-top: 0; font-size: 18px; margin-bottom: 12px;">Live Temperature Variation Graph Chart</h3>
+                <div class="chart-box">
+                    {% for item in rows[:8] %}
+                        {% set height = (item.temp | float) * 4.5 %}
+                        <div class="bar" style="height: {{ height if height > 20 else 25 }}px;" title="{{ item.location }}: {{ item.temp }}°C">
+                            {{ item.temp }}°
+                            <div class="bar-label">{{ item.location[:7] }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
